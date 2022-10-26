@@ -13,7 +13,7 @@ public class Demo : MonoBehaviour
     void OnEnable()
     {
         _scrollView = _demoUI.rootVisualElement.Q<ScrollView>();
-        _draggableScrollView = new DraggableScrollView(_scrollView, true);
+        _draggableScrollView = new DraggableScrollView(_scrollView, true, true);
         Button previous = _demoUI.rootVisualElement.Q<Button>("Previous");
         Button next = _demoUI.rootVisualElement.Q<Button>("Next");
 
