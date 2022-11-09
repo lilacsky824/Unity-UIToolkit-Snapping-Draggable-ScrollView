@@ -13,6 +13,7 @@ public class DraggableScrollView
     private ScrollView _scrollView;
     private VisualElement _scrollViewViewport;
     private VisualElement[] _elements;
+    private Dictionary<Button, bool> _elementsInitialEnabled;
     private Rect[] _elementsRects;
     private bool _snapping = false;
     private float _snapDuration = 1.0f;
@@ -22,6 +23,7 @@ public class DraggableScrollView
         _scrollView = scrollView;
         _scrollViewViewport = _scrollView.contentContainer.hierarchy.parent;
         _snapping = snapping;
+        _elementsInitialEnabled = new Dictionary<Button, bool>();
 
         _scrollViewViewport.RegisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
         _scrollViewViewport.RegisterCallback<PointerMoveEvent>(OnPointerMove, TrickleDown.TrickleDown);
@@ -48,6 +50,7 @@ public class DraggableScrollView
                 b.RegisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
                 b.RegisterCallback<PointerMoveEvent>(OnPointerMove, TrickleDown.TrickleDown);
                 b.RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
+                _elementsInitialEnabled.Add(b, b.enabledSelf);
             }
         }
     }
@@ -141,6 +144,7 @@ public class DraggableScrollView
     Vector2 _initialPosition;
     bool _dragged = false;
     bool _dragging = false;
+    bool _canClick = true;
     void OnPointerDown(PointerDownEvent evt)
     {
         _initialPosition = evt.position;
@@ -166,6 +170,17 @@ public class DraggableScrollView
     void OnPointerUp(PointerUpEvent evt)
     {
         _dragging = false;
+
+        // If target is a button, stop interation temporarily to prevent trigger click event when release.
+        if (_dragged && evt.currentTarget is Button)
+        {
+            Button element = evt.currentTarget as Button;
+            if (_elementsInitialEnabled[element])
+            {
+                element.SetEnabled(false);
+                element.schedule.Execute(() => element.SetEnabled(true));
+            }
+        }
 
         if (_snapping)
             ScrollToElement(_elements[GetNearestElementIndex()]);
