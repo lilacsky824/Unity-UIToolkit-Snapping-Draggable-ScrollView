@@ -9,7 +9,6 @@ Pass ScrollView that need Snapping and Dragging to constructor as parameter.
 
 ## WIP features.
 * Support use scroller to scroll with snapping.
-* Support looping elements.
 * Support drag ScrollViewMode.Vertical and  VerticalAndHorizontal.
 
 Use [Dotween](https://github.com/Demigiant/dotween) for snapping animation.
