@@ -19,5 +19,11 @@ public class Demo : MonoBehaviour
 
         previous.RegisterCallback<ClickEvent>((e) => _draggableScrollView.ScrollToPreviosElement());
         next.RegisterCallback<ClickEvent>((e) => _draggableScrollView.ScrollToNextElement());
+
+        List<Button> childrenButtons = _scrollView.contentContainer.Query<Button>().ToList();
+        foreach(Button btn in childrenButtons)
+        {
+            btn.clicked += () => Debug.Log("Button clicked!");
+        }
     }
 }
