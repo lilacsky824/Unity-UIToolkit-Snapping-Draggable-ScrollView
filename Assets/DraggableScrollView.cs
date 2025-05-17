@@ -224,6 +224,9 @@ public class DraggableScrollView
         _initialPosition = evt.position;
         _dragging = true;
 
+        _currentDragHandler = evt.currentTarget;
+        _currentPointer = evt.pointerId;
+        _currentDragHandler.CapturePointer(_currentPointer);
         evt.StopPropagation();
     }
 
@@ -237,10 +240,10 @@ public class DraggableScrollView
         {
             _dragged = true;
 
-            foreach (KeyValuePair<Button, PickingMode> pair in _elementsInitialPickingMode)
-            {
-                pair.Key.pickingMode = PickingMode.Ignore;
-            }
+                foreach (KeyValuePair<Button, PickingMode> pair in _elementsInitialPickingMode)
+                {
+                    pair.Key.pickingMode = PickingMode.Ignore;
+                }
         }
 
         _scrollView.horizontalScroller.value -= evt.deltaPosition.x;
@@ -258,10 +261,12 @@ public class DraggableScrollView
 
         if (_snapping)
             ScrollToElement(_elements[GetNearestElementIndex()]);
+        
+        _currentDragHandler.ReleasePointer(_currentPointer);
     }
 
     void OnScrollViewClick(ClickEvent e)
-    {     
+    {
         if (_dragged)
         {
             foreach (KeyValuePair<Button, PickingMode> pair in _elementsInitialPickingMode)
