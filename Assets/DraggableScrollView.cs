@@ -67,34 +67,27 @@ public class DraggableScrollView
 
     public void ScrollToElement(VisualElement element)
     {
-
         bool forward = GetElementCenterValue(element) > GetScrollViewCenterValue();
-
         ScrollToTargetValue(GetElementCenterValue(element) - 0.5f * _scrollViewViewport.layout.width, forward);
-
     }
 
-    public void ScrollToPreviosElement()
+    public void ScrollToPreviousElement()
     {
         int previousIndex = GetNearestElementIndex() - 1;
-
         if (previousIndex < 0)
         {
             previousIndex = _elements.Count - 1;
         }
-
         ScrollToElement(_elements[previousIndex]);
     }
 
     public void ScrollToNextElement()
     {
         int nextIndex = GetNearestElementIndex() + 1;
-
         if (nextIndex >= _elements.Count)
         {
             nextIndex = 0;
         }
-
         ScrollToElement(_elements[nextIndex]);
     }
 
@@ -106,15 +99,13 @@ public class DraggableScrollView
     /// <summary>
     /// Get nearest element that closet to ScrollView center.
     /// </summary>
-
-    int GetNearestElementIndex()
+    private int GetNearestElementIndex()
     {
         int nearest = 0;
         float previousDistance = 0;
 
         for (int i = 0; i < _elements.Count; i++)
         {
-            VisualElement currentElement = _elements[i];
             float distance = Mathf.Abs(GetScrollViewCenterValue() - GetElementCenterValue(_elements[i]));
 
             if (i == 0)
@@ -130,17 +121,17 @@ public class DraggableScrollView
         return nearest;
     }
 
-    float GetElementCenterValue(VisualElement element)
+    private float GetElementCenterValue(VisualElement element)
     {
         return element.layout.center.x;
     }
 
-    float GetScrollViewCenterValue()
+    private float GetScrollViewCenterValue()
     {
         return _scrollView.horizontalScroller.value + _scrollViewViewport.layout.width * 0.5f;
     }
 
-    void ScrollToTargetValue(float target, bool forward)
+    private void ScrollToTargetValue(float target, bool forward)
     {
         if (_snapTween != null)
         {
@@ -149,13 +140,13 @@ public class DraggableScrollView
 
         _scrollTarget = target;
         _scrollStart = _scrollView.horizontalScroller.value;
-        position = 0;
+        _position = 0;
 
         _snapTween = DOVirtual.Float(_scrollStart, target, _snapDuration, v => _scrollView.horizontalScroller.value = v);
         _snapTween.onUpdate += (() => CheckCheckElementOutsideWhenTween(forward));
     }
 
-    private float position;
+    private float _position;
     void CheckCheckElementOutsideWhenTween(bool placeForward)
     {
         bool isOutside = CheckElementOutside(placeForward, out float offset);
@@ -166,18 +157,18 @@ public class DraggableScrollView
             _scrollStart += offset;
 
             _snapTween.ChangeValues(_scrollStart, _scrollTarget);
-            _snapTween.Goto(position, true);
+            _snapTween.Goto(_position, true);
         }
         else
         {
-            position = _snapTween.position;
+            _position = _snapTween.position;
         }
     }
 
     /// <returns>Is outside?</returns>
-    bool CheckElementOutside(bool placeForward, out float offset)
+    private bool CheckElementOutside(bool placeForward, out float offset)
     {
-        bool isInside = true;
+        bool isInside;
 
         if (placeForward)
         {
@@ -217,11 +208,13 @@ public class DraggableScrollView
     #region Drag
     //Thanks martinpa_unity https://forum.unity.com/threads/how-to-register-drag-and-click-events-on-the-same-visualelement.1189135/
 
-    Vector2 _initialPosition;
-    bool _dragged = false;
-    bool _dragging = false;
+    private Vector2 _initialPosition;
+    private bool _dragged = false;
+    private bool _dragging = false;
+    private IEventHandler _currentDragHandler;
+    private int _currentPointer;
 
-    void OnPointerDown(PointerDownEvent evt)
+    private void OnPointerDown(PointerDownEvent evt)
     {
         if (_snapTween != null)
         {
@@ -234,7 +227,7 @@ public class DraggableScrollView
         evt.StopPropagation();
     }
 
-    void OnPointerMove(PointerMoveEvent evt)
+    private void OnPointerMove(PointerMoveEvent evt)
     {
         if (!_dragging)
             return;
@@ -259,7 +252,7 @@ public class DraggableScrollView
         evt.StopPropagation();
     }
 
-    void OnPointerUp(PointerUpEvent evt)
+    private void OnPointerUp(PointerUpEvent evt)
     {
         _dragging = false;
 
